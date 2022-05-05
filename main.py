@@ -1,9 +1,10 @@
 import os
 
-# import cerbos
 import requests
 import uvicorn
-from fastapi import Depends, FastAPI
+from cerbos.sdk.client import CerbosClient
+from cerbos.sdk.model import Principal, Resource
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from auth.cognito import Cognito
@@ -18,11 +19,9 @@ AWS_COGNITO_CLIENT_ID = os.environ["AWS_COGNITO_CLIENT_ID"]
 
 AWS_COGNITO_AUTH_FLOW = "ADMIN_USER_PASSWORD_AUTH"
 
-
 COGNITO = Cognito(
     AWS_REGION, AWS_COGNITO_POOL_ID, AWS_COGNITO_CLIENT_ID, AWS_COGNITO_AUTH_FLOW
 )
-
 
 JWKS_CACHED = JWKS(
     **requests.get(
@@ -31,10 +30,12 @@ JWKS_CACHED = JWKS(
     ).json()
 )
 
-
 app = FastAPI()
 basic_auth_scheme = HTTPBasic()
 token_auth_scheme = JWTBearer(JWKS_CACHED)
+
+# CERBOS = CerbosClient(host="http://localhost:3592", debug=True, tls_verify=False)
+# CERBOS = CerbosClient(host="http://localhost:3592")
 
 
 @app.get("/")
@@ -54,13 +55,36 @@ async def login(credentials: HTTPBasicCredentials = Depends(basic_auth_scheme)):
 # `curl http://{host}:{port}/protected -H "Authorization: Bearer {id_token}"`
 @app.get("/protected")
 async def protected(credentials: JWTAuthorizationCredentials = Depends(token_auth_scheme)):
-    return credentials.claims["email"]
+    return credentials
 
 
 @app.get("/users")
 async def users(credentials: JWTAuthorizationCredentials = Depends(token_auth_scheme)):
-    # TODO something cerbosy
-    return credentials.claims["email"]
+    claims = credentials.claims
+
+    user_id: str = claims["sub"]
+    groups: list[str] = claims.get("cognito:groups", [])
+
+    p = Principal(
+        user_id,
+        roles=set(groups),
+        # roles={"admin"},
+        policy_version="20210210",
+        attr={
+            "email": claims["email"],
+        },
+    )
+    r = Resource(
+        "abc123",
+        "contact",
+        attr={
+            # "owner": user_id,
+            "owner": "other_user_id",
+        },
+    )
+
+    with CerbosClient(host="http://localhost:3592") as c:
+        return {a: c.is_allowed(a, p, r) for a in ["read", "create", "update", "delete"]}
 
 
 if __name__ == "__main__":

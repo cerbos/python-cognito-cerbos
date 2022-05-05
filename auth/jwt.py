@@ -21,7 +21,7 @@ class JWKS:
 class JWTAuthorizationCredentials(BaseModel):
     jwt_token: str
     header: dict[str, str]
-    claims: dict[str, str]
+    claims: dict[str, str | list[str]]  # list[str] for cognito:groups
     signature: str
     message: str
 
@@ -45,7 +45,7 @@ class JWTBearer(HTTPBearer):
         return key.verify(jwt_credentials.message.encode(), decoded_signature)
 
     async def __call__(self, request: Request) -> JWTAuthorizationCredentials | None:
-        credentials: HTTPAuthorizationCredentials = await super().__call__(request)
+        credentials: (HTTPAuthorizationCredentials | None) = await super().__call__(request)
 
         if credentials:
             if not credentials.scheme == "Bearer":
