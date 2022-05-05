@@ -66,9 +66,13 @@ class JWTBearer(HTTPBearer):
                     message=message,
                 )
             except JWTError:
-                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="JWK invalid")
+                raise HTTPException(
+                    status_code=HTTP_403_FORBIDDEN, detail="JWK invalid"
+                )
 
             if not self.verify_jwt(jwt_credentials):
-                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="JWK invalid")
+                raise HTTPException(
+                    status_code=HTTP_403_FORBIDDEN, detail="JWK invalid"
+                )
 
             return jwt_credentials

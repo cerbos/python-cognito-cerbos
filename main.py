@@ -33,8 +33,7 @@ JWKS_CACHED = JWKS(
 
 
 app = FastAPI()
-
-security = HTTPBasic()
+basic_auth_scheme = HTTPBasic()
 token_auth_scheme = JWTBearer(JWKS_CACHED)
 
 
@@ -47,7 +46,7 @@ async def root():
 # - `*/login` in a browser prompts login
 # - `curl http://{host}:{port}/login -H "Authorization: Basic {b64encode(username + ":" + password)}"`
 @app.get("/login")
-async def login(credentials: HTTPBasicCredentials = Depends(security)):
+async def login(credentials: HTTPBasicCredentials = Depends(basic_auth_scheme)):
     return COGNITO.authenticate(credentials.username, credentials.password)
 
 
