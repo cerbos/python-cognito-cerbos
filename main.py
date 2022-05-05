@@ -7,7 +7,7 @@ from fastapi import Depends, FastAPI
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from auth.cognito import Cognito
-from auth.jwt import JWTBearer, JWKS
+from auth.jwt import JWKS, JWTBearer, JWTAuthorizationCredentials
 
 
 AWS_REGION = os.environ["AWS_DEFAULT_REGION"]
@@ -53,12 +53,12 @@ async def login(credentials: HTTPBasicCredentials = Depends(basic_auth_scheme)):
 # protected endpoint, returns username from verified jwt claims:
 # `curl http://{host}:{port}/protected -H "Authorization: Bearer {id_token}"`
 @app.get("/protected")
-async def users(credentials: str = Depends(token_auth_scheme)):
+async def protected(credentials: JWTAuthorizationCredentials = Depends(token_auth_scheme)):
     return credentials.claims["email"]
 
 
 @app.get("/users")
-async def users(credentials: str = Depends(token_auth_scheme)):
+async def users(credentials: JWTAuthorizationCredentials = Depends(token_auth_scheme)):
     # TODO something cerbosy
     return credentials.claims["email"]
 
