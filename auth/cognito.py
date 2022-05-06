@@ -3,11 +3,21 @@ import boto3
 
 class Cognito:
     def __init__(
-        self, region: str, pool_id: str, client_id: str, auth_flow: str
+        self,
+        pool_id: str,
+        client_id: str,
+        auth_flow: str,
+        access_key: str = None,
+        secret_key: str = None,
+        region: str = None,
     ) -> None:
-        self.client = boto3.client("cognito-idp")
+        self.client = boto3.client(
+            "cognito-idp",
+            aws_access_key_id=access_key,
+            aws_secret_access_key=secret_key,
+            region_name=region,
+        )
 
-        self._region = region
         self._pool_id = pool_id
         self._client_id = client_id
         self._auth_flow = auth_flow

@@ -6,21 +6,15 @@ from cerbos.sdk.client import CerbosClient
 from cerbos.sdk.model import Principal, Resource
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from starlette.status import HTTP_403_FORBIDDEN
 
 from auth.cognito import Cognito
 from auth.jwt import JWKS, JWTAuthorizationCredentials, JWTBearer
 
-AWS_REGION = os.environ["AWS_DEFAULT_REGION"]
-AWS_COGNITO_POOL_ID = os.environ["AWS_COGNITO_POOL_ID"]
-AWS_COGNITO_CLIENT_ID = os.environ["AWS_COGNITO_CLIENT_ID"]
-# os.environ["AWS_ACCESS_KEY_ID"]
-# os.environ["AWS_SECRET_ACCESS_KEY"]
-
 AWS_COGNITO_AUTH_FLOW = "ADMIN_USER_PASSWORD_AUTH"
 
-COGNITO = Cognito(
-    AWS_REGION, AWS_COGNITO_POOL_ID, AWS_COGNITO_CLIENT_ID, AWS_COGNITO_AUTH_FLOW
-)
+AWS_REGION = os.environ["AWS_DEFAULT_REGION"]
+AWS_COGNITO_POOL_ID = os.environ["AWS_COGNITO_POOL_ID"]
 
 JWKS_CACHED = JWKS(
     **requests.get(
@@ -29,12 +23,18 @@ JWKS_CACHED = JWKS(
     ).json()
 )
 
+COGNITO = Cognito(
+    pool_id=AWS_COGNITO_POOL_ID,
+    client_id=os.environ["AWS_COGNITO_CLIENT_ID"],
+    auth_flow=AWS_COGNITO_AUTH_FLOW,
+    access_key=os.environ["AWS_ACCESS_KEY_ID"],
+    secret_key=os.environ["AWS_SECRET_ACCESS_KEY"],
+    region=AWS_REGION,
+)
+
 app = FastAPI()
 basic_auth_scheme = HTTPBasic()
 token_auth_scheme = JWTBearer(JWKS_CACHED)
-
-# CERBOS = CerbosClient(host="http://localhost:3592", debug=True, tls_verify=False)
-# CERBOS = CerbosClient(host="http://localhost:3592")
 
 
 @app.get("/")
@@ -59,8 +59,8 @@ async def protected(
     return credentials
 
 
-@app.get("/users")
-async def users(credentials: JWTAuthorizationCredentials = Depends(token_auth_scheme)):
+@app.get("/user")
+async def user(credentials: JWTAuthorizationCredentials = Depends(token_auth_scheme)):
     claims = credentials.claims
 
     user_id: str = claims["sub"]
@@ -68,7 +68,7 @@ async def users(credentials: JWTAuthorizationCredentials = Depends(token_auth_sc
 
     p = Principal(
         user_id,
-        roles=set(groups),
+        roles=groups,
         # roles={"admin"},
         policy_version="20210210",
         attr={
@@ -85,6 +85,16 @@ async def users(credentials: JWTAuthorizationCredentials = Depends(token_auth_sc
     )
 
     with CerbosClient(host="http://localhost:3592") as c:
+        ## usually check for a specific action
+        # action = "read"
+        # if not c.is_allowed(action, p, r):
+        #     raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Unauthorized")
+        # return {
+        #     "id": user_id,
+        #     "email": claims["email"],
+        #     "foo": "bar",
+        # }
+
         return {
             a: c.is_allowed(a, p, r) for a in ["read", "create", "update", "delete"]
         }
