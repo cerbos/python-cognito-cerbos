@@ -1,13 +1,12 @@
 from dataclasses import dataclass
 
 from fastapi import HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import jwt, jwk, JWTError
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError, jwk, jwt
 from jose.utils import base64url_decode
 from pydantic import BaseModel
 from starlette.requests import Request
 from starlette.status import HTTP_403_FORBIDDEN
-
 
 # TODO typing lib for backwards compat?
 JWK = dict[str, str]
@@ -45,7 +44,9 @@ class JWTBearer(HTTPBearer):
         return key.verify(jwt_credentials.message.encode(), decoded_signature)
 
     async def __call__(self, request: Request) -> JWTAuthorizationCredentials | None:
-        credentials: (HTTPAuthorizationCredentials | None) = await super().__call__(request)
+        credentials: (HTTPAuthorizationCredentials | None) = await super().__call__(
+            request
+        )
 
         if credentials:
             if not credentials.scheme == "Bearer":

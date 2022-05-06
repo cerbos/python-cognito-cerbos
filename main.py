@@ -8,8 +8,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from auth.cognito import Cognito
-from auth.jwt import JWKS, JWTBearer, JWTAuthorizationCredentials
-
+from auth.jwt import JWKS, JWTAuthorizationCredentials, JWTBearer
 
 AWS_REGION = os.environ["AWS_DEFAULT_REGION"]
 AWS_COGNITO_POOL_ID = os.environ["AWS_COGNITO_POOL_ID"]
@@ -54,7 +53,9 @@ async def login(credentials: HTTPBasicCredentials = Depends(basic_auth_scheme)):
 # protected endpoint, returns username from verified jwt claims:
 # `curl http://{host}:{port}/protected -H "Authorization: Bearer {id_token}"`
 @app.get("/protected")
-async def protected(credentials: JWTAuthorizationCredentials = Depends(token_auth_scheme)):
+async def protected(
+    credentials: JWTAuthorizationCredentials = Depends(token_auth_scheme),
+):
     return credentials
 
 
@@ -84,7 +85,9 @@ async def users(credentials: JWTAuthorizationCredentials = Depends(token_auth_sc
     )
 
     with CerbosClient(host="http://localhost:3592") as c:
-        return {a: c.is_allowed(a, p, r) for a in ["read", "create", "update", "delete"]}
+        return {
+            a: c.is_allowed(a, p, r) for a in ["read", "create", "update", "delete"]
+        }
 
 
 if __name__ == "__main__":

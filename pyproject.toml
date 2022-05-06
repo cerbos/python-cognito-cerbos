@@ -1,23 +1,45 @@
-[tool.poetry]
+[project]
 name = "python-cognito-cerbos"
 version = "0.1.0"
-description = ""
-authors = ["Your Name <you@example.com>"]
-license = "Apache-2.0"
+description = "Demo of Cerbos integration with FastAPI and AWS Cognito User Pools"
+authors = [
+    {name = "Cerbos Developers", email = "help@cerbos.dev"},
+]
+dependencies = [
+    "uvicorn[standard]>=0.17.6",
+    "cerbos>=0.1.0",
+    "fastapi>=0.76.0",
+    "boto3>=1.22.8",
+    "python-jose[cryptography]>=3.3.0",
+    "requests>=2.27.1",
+]
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
 
-[tool.poetry.dependencies]
-python = ">=3.8,<4"
-cerbos = "^0.1.0"
-boto3 = "^1.22.5"
-fastapi = "^0.75.2"
-uvicorn = {extras = ["standard"], version = "^0.17.6"}
-requests = "^2.27.1"
-python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+[project.optional-dependencies]
 
-[tool.poetry.dev-dependencies]
-black = "^22.3.0"
-flake8 = "^4.0.1"
+[tool.pdm]
+[tool.pdm.dev-dependencies]
+lint = [
+    "black>=22.3.0",
+    "isort>=5.10.1",
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["pdm-pep517>=0.12.0"]
+build-backend = "pdm.pep517.api"
+
+[tool.pyprojectx]
+pdm = "pdm==1.14.1"
+black = "black"
+isort = "isort"
+
+[tool.pyprojectx.aliases]
+install = "pdm install"
+outdated = "pdm update --outdated"
+black = "black main.py auth"
+isort = "isort main.py auth"
+format = "pw@isort && pw@black"
+demo = "pdm run python main.py"
+#test = "pdm run pytest"
+#run = "pdm run"
