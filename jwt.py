@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from dataclasses_json import LetterCase, dataclass_json
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwk, jwt
@@ -10,6 +11,17 @@ from starlette.status import HTTP_403_FORBIDDEN
 
 # TODO typing lib for backwards compat?
 JWK = dict[str, str]
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class TokenResponse:
+    AccessToken: str
+    IdToken: str
+    RefreshToken: str
+    TokenType: str
+    # TODO not set on Cognito instance, even though returned in authenticate_user, override and retrieve?
+    # ExpiresIn: str
 
 
 @dataclass()

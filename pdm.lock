@@ -145,6 +145,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "envs"
+version = "1.4"
+requires_python = ">=3.6,<4.0"
+summary = "Easy access of environment variables from Python with support for strings, booleans, list, tuples, and dicts."
+
+[[package]]
 name = "fastapi"
 version = "0.76.0"
 requires_python = ">=3.6.1"
@@ -294,6 +300,17 @@ summary = "A small Python module for determining appropriate platform-specific d
 name = "pyasn1"
 version = "0.4.8"
 summary = "ASN.1 types and codecs"
+
+[[package]]
+name = "pycognito"
+version = "2022.5.0"
+summary = "Python class to integrate Boto3's Cognito client so it is easy to login users. With SRP support."
+dependencies = [
+    "boto3>=1.10.49",
+    "envs>=1.3",
+    "python-jose[cryptography]>=3.2.0",
+    "requests>=2.22.0",
+]
 
 [[package]]
 name = "pycparser"
@@ -537,7 +554,7 @@ summary = "Module for decorators, wrappers and monkey patching."
 
 [metadata]
 lock_version = "3.1"
-content_hash = "sha256:5b7de1b650bec09002dc21a75a5443c6552ce7df019322f724a1927ac2598aca"
+content_hash = "sha256:d557a09c4cfd886d0d30fcc887c994b291453e5d5ef1d1b506d728f14bd21d8e"
 
 [metadata.files]
 "anyio 3.5.0" = [
@@ -579,6 +596,7 @@ content_hash = "sha256:5b7de1b650bec09002dc21a75a5443c6552ce7df019322f724a1927ac
 ]
 "botocore 1.25.8" = [
     {file = "botocore-1.25.8-py3-none-any.whl", hash = "sha256:5b342da3487e5669801f5589cc15e379fc9f7803a426584d08a6329575644da3"},
+    {file = "botocore-1.25.8.tar.gz", hash = "sha256:f0a7e9fb6000a6cfc7ca63971d8d1ab4ed3c38514ded439bcf1fc8bca162dc1b"},
 ]
 "cerbos 0.1.0" = [
     {file = "cerbos-0.1.0-py3-none-any.whl", hash = "sha256:f96dce465c07c50ab7e3a9f6b68ed16912c44d4f908bdb2f4ede268c5b69de9a"},
@@ -692,6 +710,10 @@ content_hash = "sha256:5b7de1b650bec09002dc21a75a5443c6552ce7df019322f724a1927ac
     {file = "ecdsa-0.17.0-py2.py3-none-any.whl", hash = "sha256:5cf31d5b33743abe0dfc28999036c849a69d548f994b535e527ee3cb7f3ef676"},
     {file = "ecdsa-0.17.0.tar.gz", hash = "sha256:b9f500bb439e4153d0330610f5d26baaf18d17b8ced1bc54410d189385ea68aa"},
 ]
+"envs 1.4" = [
+    {file = "envs-1.4-py3-none-any.whl", hash = "sha256:4a1fcf85e4d4443e77c348ff7cdd3bfc4c0178b181d447057de342e4172e5ed1"},
+    {file = "envs-1.4.tar.gz", hash = "sha256:9d8435c6985d1cdd68299e04c58e2bdb8ae6cf66b2596a8079e6f9a93f2a0398"},
+]
 "fastapi 0.76.0" = [
     {file = "fastapi-0.76.0-py3-none-any.whl", hash = "sha256:1e05c868651e3935bd9b290c61a3661a54e37471d3a0700bc5e4380f9ed935ae"},
     {file = "fastapi-0.76.0.tar.gz", hash = "sha256:a5f99f6e827c7108a8efaf1d7f19d6cf2d735ad984f5e44d33ccec6ee88a7da1"},
@@ -798,6 +820,10 @@ content_hash = "sha256:5b7de1b650bec09002dc21a75a5443c6552ce7df019322f724a1927ac
 "pyasn1 0.4.8" = [
     {file = "pyasn1-0.4.8-py2.py3-none-any.whl", hash = "sha256:39c7e2ec30515947ff4e87fb6f456dfc6e84857d34be479c9d4a4ba4bf46aa5d"},
     {file = "pyasn1-0.4.8.tar.gz", hash = "sha256:aef77c9fb94a3ac588e87841208bdec464471d9871bd5050a287cc9a475cd0ba"},
+]
+"pycognito 2022.5.0" = [
+    {file = "pycognito-2022.5.0-py3-none-any.whl", hash = "sha256:ecde8325b1662c2798d91729d0968b1120924146f4e4d5f288f61fe2cf83dc86"},
+    {file = "pycognito-2022.5.0.tar.gz", hash = "sha256:ad33022d78506ce672ef9ff1cf4a0d4d3eb096b5ff73320f355bf5526f0aa36a"},
 ]
 "pycparser 2.21" = [
     {file = "pycparser-2.21-py2.py3-none-any.whl", hash = "sha256:8ee45429555515e1f6b185e78100aea234072576aa43ab53aefcae078162fca9"},
