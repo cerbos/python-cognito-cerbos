@@ -36,7 +36,9 @@ app.add_middleware(SessionMiddleware, secret_key="super-secret-key!")
 templates = Jinja2Templates(directory="templates")
 
 
-def get_hosted_url(path: str, extra_qs: dict = None) -> str | None:
+def get_hosted_url(
+    path: str, extra_qs_params: dict = None, override_qs_params: bool = False
+) -> str | None:
     if not AWS_COGNITO_HOSTED_UI_CALLBACK_URL or not AWS_COGNITO_HOSTED_UI_LOGOUT_URL:
         return None
 
@@ -46,8 +48,10 @@ def get_hosted_url(path: str, extra_qs: dict = None) -> str | None:
         "scope": "email+openid",
         "redirect_uri": AWS_COGNITO_HOSTED_UI_CALLBACK_URL,
     }
-    if extra_qs:
-        qs_params |= extra_qs
+    if extra_qs_params:
+        qs_params = (
+            extra_qs_params if override_qs_params else qs_params | extra_qs_params
+        )
 
     url = url_parse.urlunsplit(
         [
@@ -120,14 +124,18 @@ async def callback(request: Request):
     code = request.query_params["code"]
     # retrieve tokens from `/oauth2/tokens`
     try:
-        r = requests.post(
-            f"https://{AWS_COGNITO_POOL_NAME}.auth.{AWS_DEFAULT_REGION}.amazoncognito.com/oauth2/token",
-            params={
+        url = get_hosted_url(
+            "oauth2/token",
+            {
                 "grant_type": "authorization_code",
                 "client_id": AWS_COGNITO_CLIENT_ID,
                 "redirect_uri": AWS_COGNITO_HOSTED_UI_CALLBACK_URL,
                 "code": code,
             },
+            override_qs_params=True,
+        )
+        r = requests.post(
+            url,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
         r.raise_for_status()
