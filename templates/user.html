@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Cerbos Cognito Demo</title>
+        <link rel="stylesheet" href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css">
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+    </head>
+    <body class="min-h-screen bg-gray-100 py-6 flex flex-col justify-center">
+        <div class="relative px-4 py-10 bg-white shadow-lg mx-auto rounded w-full" id="container">
+            <div class="flex">
+                <div class="w-3/4">
+                    <h1 class="pb-4 text-base leading-6 font-bold text-xl">Cerbos Cognito Demo</h1>
+                </div>
+                <div class="text-right w-1/4">
+                    <a class="px-6 rounded bg-blue-500 p-2 text-center text-white shadow-lg" href="{{ url_for('logout') }}">Logout</a>
+                </div>
+            </div>
+            <h2 class="text-lg leading-6 font-bold mb-2">User ID:</h2>
+            <p class="pb-4 font-mono leading-6 text-sm">{{ user_id }}</p>
+            <div class="flex">
+                <div class="pr-2 w-1/3">
+                    <p class="text-lg leading-6 font-bold mb-2">Cognito Access Token Claims</p>
+                    <p class="h-20 text-sm">The claims retrieved from the access token provided by Cognito, with the authentication information and any roles set (in the "groups" attribute).</p>
+                    <pre class="text-xs bg-gray-100 font-mono overflow-auto rounded"><code class="highlight-json">{{ jwt }}</code></pre>
+                </div>
+                <div class="pl-2 pr-2 w-1/3">
+                    <p class="text-lg leading-6 font-bold mb-2">Cerbos Request</p>
+                    <p class="h-20 text-sm">The request to the Cerbos PDP with the ID and Roles of the principal passed from the Cognito access token along with two example resources. Normally these would be fetched from your datastore.</p>
+                    <pre class="text-xs bg-gray-100 font-mono overflow-auto rounded"><code class="highlight-json">{{ cerbosPayload }}</code></pre>
+                </div>
+                <div class="pl-2 w-1/3">
+                    <p class="text-lg leading-6 font-bold mb-2">Cerbos Response</p>
+                    <p class="h-20 text-sm">The authorization response from the Cerbos PDP. If you are logged in as an <b>admin</b> then all actions are allowed. If you have the <b>user</b> role then it is only possible to <em>update</em> or <em>delete</em> if you are the owner of the resource. You can find the full policy <a class="underline" href="https://play.cerbos.dev/p/g561543292ospj7w0zOrFx7H5DzhmLu2">here</a>.</p>
+                    <div class="text-sm mb-2 p-2 border border-gray-200 rounded">
+                        <table class="w-full">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="text-left p-1">Resource</th>
+                                    <th class="p-1">Read</th>
+                                    <th class="p-1">Update</th>
+                                    <th class="p-1">Delete</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for r in cerbosResponse.results %}
+                                <tr>
+                                    <td class="p-1">{{ r.resource.id }}</td>
+                                    <td class="text-center p-1">
+                                        {% if r.actions["read"] == "EFFECT_ALLOW" %}
+                                        <p class="text-green-500 font-bold">Yes</p>
+                                        {% else %}
+                                        <p class="text-red-500 font-bold">No</p>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center p-1">
+                                        {% if r.actions["update"] == "EFFECT_ALLOW" %}
+                                        <p class="text-green-500 font-bold">Yes</p>
+                                        {% else %}
+                                        <p class="text-red-500 font-bold">No</p>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center p-1">
+                                        {% if r.actions["delete"] == "EFFECT_ALLOW" %}
+                                        <p class="text-green-500 font-bold">Yes</p>
+                                        {% else %}
+                                        <p class="text-red-500 font-bold">No</p>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <pre class="text-xs bg-gray-100 font-mono overflow-auto rounded"><code class="highlight-json">{{ cerbosResponseJson }}</code></pre>
+                </div>
+            </div>
+            <div class="pt-5 text-sm text-center">
+                <p>The code for this example is available <a class="underline" href="https://github.com/cerbos/python-cognito-cerbos">Github</a>. More information, examples and documentation can be found on <a class="underline" href="https://cerbos.dev">cerbos.dev</a>
+                </p>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,27 +1,20 @@
+import os
 from dataclasses import dataclass
+from dataclasses_json import dataclass_json
 
-from dataclasses_json import LetterCase, dataclass_json
-from fastapi import HTTPException
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+import requests
+from fastapi import Depends, HTTPException, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2PasswordBearer
 from jose import JWTError, jwk, jwt
 from jose.utils import base64url_decode
-from pydantic import BaseModel
-from starlette.requests import Request
 from starlette.status import HTTP_403_FORBIDDEN
 
-# TODO typing lib for backwards compat?
+
+# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+bearer_scheme = HTTPBearer()
+
+
 JWK = dict[str, str]
-
-
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
-class TokenResponse:
-    AccessToken: str
-    IdToken: str
-    RefreshToken: str
-    TokenType: str
-    # TODO not set on Cognito instance, even though returned in authenticate_user, override and retrieve?
-    # ExpiresIn: str
 
 
 @dataclass()
@@ -29,7 +22,16 @@ class JWKS:
     keys: list[JWK]
 
 
-class JWTAuthorizationCredentials(BaseModel):
+_jwks = JWKS(**requests.get(
+    f"https://cognito-idp.{os.environ['AWS_DEFAULT_REGION']}.amazonaws.com/"
+    f"{os.environ['AWS_COGNITO_POOL_ID']}/.well-known/jwks.json"
+).json())
+JWK_CACHE: dict[str, JWK] = {jwk["kid"]: jwk for jwk in _jwks.keys}
+
+
+@dataclass_json
+@dataclass
+class Credentials:
     jwt_token: str
     header: dict[str, str]
     claims: dict[str, str | list[str]]  # list[str] for cognito:groups
@@ -37,55 +39,47 @@ class JWTAuthorizationCredentials(BaseModel):
     message: str
 
 
-class JWTBearer(HTTPBearer):
-    def __init__(self, jwks: JWKS, auto_error: bool = True):
-        super().__init__(auto_error=auto_error)
-        self.kid_to_jwk = {jwk["kid"]: jwk for jwk in jwks.keys}
-
-    def verify_jwt(self, jwt_credentials: JWTAuthorizationCredentials) -> bool:
-        try:
-            public_key = self.kid_to_jwk[jwt_credentials.header["kid"]]
-        except KeyError:
-            raise HTTPException(
-                status_code=HTTP_403_FORBIDDEN, detail="JWK public key not found"
-            )
-
-        key = jwk.construct(public_key)
-        decoded_signature = base64url_decode(jwt_credentials.signature.encode())
-
-        return key.verify(jwt_credentials.message.encode(), decoded_signature)
-
-    async def __call__(self, request: Request) -> JWTAuthorizationCredentials | None:
-        credentials: (HTTPAuthorizationCredentials | None) = await super().__call__(
-            request
+def verify_jwt(credentials: Credentials) -> bool:
+    try:
+        public_key = JWK_CACHE[credentials.header["kid"]]
+    except KeyError:
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN, detail="JWK public key not found"
         )
 
-        if credentials:
-            if not credentials.scheme == "Bearer":
-                raise HTTPException(
-                    status_code=HTTP_403_FORBIDDEN, detail="Wrong authentication method"
-                )
+    key = jwk.construct(public_key)
+    decoded_signature = base64url_decode(credentials.signature.encode())
 
-            jwt_token = credentials.credentials
+    return key.verify(credentials.message.encode(), decoded_signature)
 
-            message, signature = jwt_token.rsplit(".", 1)
 
-            try:
-                jwt_credentials = JWTAuthorizationCredentials(
-                    jwt_token=jwt_token,
-                    header=jwt.get_unverified_header(jwt_token),
-                    claims=jwt.get_unverified_claims(jwt_token),
-                    signature=signature,
-                    message=message,
-                )
-            except JWTError:
-                raise HTTPException(
-                    status_code=HTTP_403_FORBIDDEN, detail="JWK invalid"
-                )
+async def get_token_from_bearer(request: Request, http_credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)) -> Credentials:
+    if http_credentials:
+        if not http_credentials.scheme == "Bearer":
+            raise HTTPException(
+                status_code=HTTP_403_FORBIDDEN, detail="Wrong authentication method"
+            )
 
-            if not self.verify_jwt(jwt_credentials):
-                raise HTTPException(
-                    status_code=HTTP_403_FORBIDDEN, detail="JWK invalid"
-                )
+        return http_credentials.credentials
 
-            return jwt_credentials
+
+async def get_credentials(token: str = Depends(get_token_from_bearer)) -> Credentials:
+    message, signature = token.rsplit(".", 1)
+    try:
+        credentials = Credentials(
+            jwt_token=token,
+            header=jwt.get_unverified_header(token),
+            claims=jwt.get_unverified_claims(token),
+            signature=signature,
+            message=message,
+        )
+    except JWTError:
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN, detail="JWK invalid"
+        )
+
+    if not verify_jwt(credentials):
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN, detail="JWK invalid"
+        )
+    return credentials

@@ -1,0 +1,50 @@
+<html lang="en">
+    <head>
+        <title>Cerbos Cognito Demo</title>
+        <link rel="stylesheet" href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css">
+    </head>
+    <body class="min-h-screen bg-gray-100 py-6 flex flex-col justify-center">
+        <div class="relative px-8 pt-6 pb-8 mb-4 flex flex-col bg-white shadow-lg max-w-xl mx-auto rounded" id="container">
+            <h1 class="pb-6 text-base leading-6 font-bold text-xl">Cerbos Cognito</h1>
+            <p class="pb-4 text-sm">This is a demo application integrating Cerbos and Cognito.</p>
+            {% if errors %}
+            <div class="pt-2 px-2 mb-6 bg-yellow-200 text-sm">
+                {% for error in errors %}
+                <li class="pb-2">{{error}}</li>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <form class="p-4 bg-blue-50 rounded" action="{{ url_for('login') }}" method="POST">
+                <div class="mb-4">
+                    <label class="block text-grey-darker text-sm font-bold mb-2" for="username">Username</label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-grey-darker" name="username" id="username" type="text" placeholder="Username">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-grey-darker text-sm font-bold mb-2" for="password">Password</label>
+                    <input class="shadow appearance-none border border-red rounded w-full py-2 px-3 text-grey-darker mb-3" name="password" id="password" type="password" placeholder="******************">
+                    <p class="text-red text-xs italic">Please choose a password.</p>
+                </div>
+                <div class="flex items-center justify-between">
+                    <button class="bg-blue-500 hover:bg-blue-dark text-white font-bold py-2 px-4 rounded" type="submit">
+                        Sign In
+                    </button>
+                </div>
+            </form>
+            <!--<a class="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker" href="#">-->
+            <!--    Forgot Password?-->
+            <!--</a>-->
+            <!--<div class="py-3">-->
+            {% if hosted_url %}
+            <div class="p-5 bg-blue-50 rounded">
+                <!--<p class="font-bold">Cognito hosted UI</p>-->
+                <p class="text-sm">Alternatively, you can login via the Cognito hosted UI (if configured)</p>
+                <div class="flex items-center justify-between pt-5"><a class="bg-blue-500 hover:bg-blue-dark text-white font-bold py-2 px-4 rounded" href="{{ hosted_url }}">Go to Cognito login</a></div>
+            </div>
+            {% endif %}
+            <div class="pt-5 text-sm">
+                <p class="pb-2">You can find the policy <a class="underline" href="https://play.cerbos.dev/p/g561543292ospj7w0zOrFx7H5DzhmLu2">here</a> and the code for this example on <a class="underline" href="https://github.com/cerbos/python-cognito-cerbos">Github</a></p>
+                <p>More information, examples and documentation can be found on <a class="underline" href="https://cerbos.dev">cerbos.dev</a></p>
+            </div>
+        </div>
+    </body>
+</html>
