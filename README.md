@@ -10,7 +10,7 @@ An example application of integrating [Cerbos](https://cerbos.dev) with a [FastA
 
 ## Getting Started
 
-1. Start up the Cerbos PDP instance docker container. This will be called by the express app to check authorization.
+1. Start up the Cerbos PDP instance docker container. This will be called by the FastAPI app to check authorization.
 
 ```bash
 cd cerbos
@@ -58,7 +58,7 @@ Any test users in your pool should be added to one or both of `admin` and `user`
 
 ## Policies
 
-This example has a simple CRUD policy in place for a resource kind of `contact` - like a CRM system would have. The policy file can be found in the `cerbos/policies` folder [here](https://github.com/cerbos/express-auth0-cerbos/blob/main/cerbos/policies/contact.yaml).
+This example has a simple CRUD policy in place for a resource kind of `contact` - like a CRM system would have. The policy file can be found in the `cerbos/policies` folder [here](https://github.com/cerbos/python-cognito-cerbos/blob/main/cerbos/policies/contact.yaml).
 
 Should you wish to experiment with this policy, you can <a href="https://play.cerbos.dev/p/g561543292ospj7w0zOrFx7H5DzhmLu2" target="_blank">try it in the Cerbos Playground</a>.
 
