@@ -16,7 +16,6 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from jwt import Credentials, get_credentials
 
-
 AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
 AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
 AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION")
@@ -27,8 +26,12 @@ AWS_COGNITO_POOL_ID = os.environ["AWS_COGNITO_POOL_ID"]
 AWS_COGNITO_POOL_NAME = os.getenv("AWS_COGNITO_POOL_NAME")
 
 # Optional envvars to be set if you want to enable hosted Cognito UI login
-AWS_COGNITO_HOSTED_UI_CALLBACK_URL = os.getenv("AWS_COGNITO_HOSTED_UI_CALLBACK_URL", "http://localhost:8000/callback")
-AWS_COGNITO_HOSTED_UI_LOGOUT_URL = os.getenv("AWS_COGNITO_HOSTED_UI_LOGOUT_URL", "http://localhost:8000/")
+AWS_COGNITO_HOSTED_UI_CALLBACK_URL = os.getenv(
+    "AWS_COGNITO_HOSTED_UI_CALLBACK_URL", "http://localhost:8000/callback"
+)
+AWS_COGNITO_HOSTED_UI_LOGOUT_URL = os.getenv(
+    "AWS_COGNITO_HOSTED_UI_LOGOUT_URL", "http://localhost:8000/"
+)
 
 
 app = FastAPI()
@@ -50,17 +53,19 @@ def get_hosted_url(path: str, extra_qs: dict = None) -> str | None:
     if extra_qs:
         qs_params |= extra_qs
 
-    url = url_parse.urlunsplit([
-        "https",
-        f"{AWS_COGNITO_POOL_NAME}.auth.{AWS_DEFAULT_REGION}.amazoncognito.com",
-        path,
-        url_parse.urlencode(
-            qs_params,
-            safe="+",  # scope expects `+` delimiters
-            quote_via=url_parse.quote,
-        ),
-        ""
-    ])
+    url = url_parse.urlunsplit(
+        [
+            "https",
+            f"{AWS_COGNITO_POOL_NAME}.auth.{AWS_DEFAULT_REGION}.amazoncognito.com",
+            path,
+            url_parse.urlencode(
+                qs_params,
+                safe="+",  # scope expects `+` delimiters
+                quote_via=url_parse.quote,
+            ),
+            "",
+        ]
+    )
 
     return url
 
@@ -74,7 +79,7 @@ def get_user_from_session(request: Request) -> dict:
     if creds is None:
         raise HTTPException(
             status_code=status.HTTP_307_TEMPORARY_REDIRECT,
-            headers={'Location': request.url_for("index")},
+            headers={"Location": request.url_for("index")},
         )
     return Credentials.from_dict(creds)
 
@@ -88,11 +93,18 @@ async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends
         # c.admin_authenticate(password=data.password)
     except ForceChangePasswordException:
         # TODO not implemented password change UI
-        return templates.TemplateResponse("index.html", {"request": request, "errors": ["Password change required"]})
+        return templates.TemplateResponse(
+            "index.html", {"request": request, "errors": ["Password change required"]}
+        )
     except c.client.exceptions.NotAuthorizedException:
-        return templates.TemplateResponse("index.html", {"request": request, "errors": ["Incorrect username or password"]})
+        return templates.TemplateResponse(
+            "index.html",
+            {"request": request, "errors": ["Incorrect username or password"]},
+        )
     except Exception:
-        return templates.TemplateResponse("index.html", {"request": request, "errors": ["Something went wrong"]})
+        return templates.TemplateResponse(
+            "index.html", {"request": request, "errors": ["Something went wrong"]}
+        )
 
     credentials = await get_credentials(c.access_token)
     request.session["user_credentials"] = credentials.to_dict()
@@ -119,9 +131,7 @@ async def callback(request: Request):
             "redirect_uri": AWS_COGNITO_HOSTED_UI_CALLBACK_URL,
             "code": code,
         },
-        headers={
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
     tokens = r.json()
     credentials = await get_credentials(tokens["access_token"])
@@ -138,7 +148,7 @@ async def logout(request: Request):
     if request.session.pop("used_hosted", None):
         url = get_hosted_url("logout", {"logout_uri": AWS_COGNITO_HOSTED_UI_LOGOUT_URL})
         return RedirectResponse(url=url)
-    return RedirectResponse(url='/')
+    return RedirectResponse(url="/")
 
 
 @app.get("/user", response_class=HTMLResponse)
@@ -199,17 +209,22 @@ async def user(request: Request, credentials: dict = Depends(get_user_from_sessi
         resp = c.check_resources(principal=principal, resources=resource_list)
         resp.raise_if_failed()
 
-    return templates.TemplateResponse("user.html", {
-        "user_id": user_id,
-        "request": request,
-        "jwt": prettify_json(claims),
-        "cerbosPayload": prettify_json({
-            "principal": principal.to_dict(),
-            "resource_list": resource_list.to_dict(),
-        }),
-        "cerbosResponse": resp,
-        "cerbosResponseJson": prettify_json(resp.to_dict()),
-    })
+    return templates.TemplateResponse(
+        "user.html",
+        {
+            "user_id": user_id,
+            "request": request,
+            "jwt": prettify_json(claims),
+            "cerbosPayload": prettify_json(
+                {
+                    "principal": principal.to_dict(),
+                    "resource_list": resource_list.to_dict(),
+                }
+            ),
+            "cerbosResponse": resp,
+            "cerbosResponseJson": prettify_json(resp.to_dict()),
+        },
+    )
 
 
 # This endpoint requires the access token to be passed in the Authorization header,
