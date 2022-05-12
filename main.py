@@ -26,12 +26,8 @@ AWS_COGNITO_POOL_ID = os.environ["AWS_COGNITO_POOL_ID"]
 AWS_COGNITO_POOL_NAME = os.getenv("AWS_COGNITO_POOL_NAME")
 
 # Optional envvars to be set if you want to enable hosted Cognito UI login
-AWS_COGNITO_HOSTED_UI_CALLBACK_URL = os.getenv(
-    "AWS_COGNITO_HOSTED_UI_CALLBACK_URL", "http://localhost:8000/callback"
-)
-AWS_COGNITO_HOSTED_UI_LOGOUT_URL = os.getenv(
-    "AWS_COGNITO_HOSTED_UI_LOGOUT_URL", "http://localhost:8000/"
-)
+AWS_COGNITO_HOSTED_UI_CALLBACK_URL = os.getenv("AWS_COGNITO_HOSTED_UI_CALLBACK_URL")
+AWS_COGNITO_HOSTED_UI_LOGOUT_URL = os.getenv("AWS_COGNITO_HOSTED_UI_LOGOUT_URL")
 
 
 app = FastAPI()
