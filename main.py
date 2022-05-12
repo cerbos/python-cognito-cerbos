@@ -14,7 +14,7 @@ from pycognito import Cognito
 from pycognito.exceptions import ForceChangePasswordException
 from starlette.middleware.sessions import SessionMiddleware
 
-from jwt import Credentials, get_credentials
+from jwt import Credentials, get_credentials_from_token
 
 AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
 AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
@@ -106,7 +106,7 @@ async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends
             "index.html", {"request": request, "errors": ["Something went wrong"]}
         )
 
-    credentials = await get_credentials(c.access_token)
+    credentials = await get_credentials_from_token(c.access_token)
     request.session["user_credentials"] = credentials.to_dict()
     return RedirectResponse(url="/user", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -123,18 +123,26 @@ async def index(request: Request):
 async def callback(request: Request):
     code = request.query_params["code"]
     # retrieve tokens from `/oauth2/tokens`
-    r = requests.post(
-        f"https://{AWS_COGNITO_POOL_NAME}.auth.{AWS_DEFAULT_REGION}.amazoncognito.com/oauth2/token",
-        params={
-            "grant_type": "authorization_code",
-            "client_id": AWS_COGNITO_CLIENT_ID,
-            "redirect_uri": AWS_COGNITO_HOSTED_UI_CALLBACK_URL,
-            "code": code,
-        },
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
-    )
-    tokens = r.json()
-    credentials = await get_credentials(tokens["access_token"])
+    try:
+        r = requests.post(
+            f"https://{AWS_COGNITO_POOL_NAME}.auth.{AWS_DEFAULT_REGION}.amazoncognito.com/oauth2/token",
+            params={
+                "grant_type": "authorization_code",
+                "client_id": AWS_COGNITO_CLIENT_ID,
+                "redirect_uri": AWS_COGNITO_HOSTED_UI_CALLBACK_URL,
+                "code": code,
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        r.raise_for_status()
+        tokens = r.json()
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
+
+    credentials = await get_credentials_from_token(tokens["access_token"])
     request.session["user_credentials"] = credentials.to_dict()
     request.session["used_hosted"] = True
     return RedirectResponse(url="/user")
@@ -232,7 +240,7 @@ async def user(request: Request, credentials: dict = Depends(get_user_from_sessi
 # `curl http://{host}:{port}/protected -H "Authorization: Bearer {access_token}"`
 @app.get("/protected")
 async def protected(
-    credentials: Credentials = Depends(get_credentials),
+    credentials: Credentials = Depends(get_credentials_from_token),
 ):
     return credentials
 

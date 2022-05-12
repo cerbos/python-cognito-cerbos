@@ -4,10 +4,9 @@ from dataclasses import dataclass
 import requests
 from dataclasses_json import dataclass_json
 from fastapi import Depends, HTTPException, Request
-from fastapi.security import (
+from fastapi.security import (  # OAuth2PasswordBearer,
     HTTPAuthorizationCredentials,
     HTTPBearer,
-    OAuth2PasswordBearer,
 )
 from jose import JWTError, jwk, jwt
 from jose.utils import base64url_decode
@@ -71,7 +70,9 @@ async def get_token_from_bearer(
         return http_credentials.credentials
 
 
-async def get_credentials(token: str = Depends(get_token_from_bearer)) -> Credentials:
+async def get_credentials_from_token(
+    token: str = Depends(get_token_from_bearer),
+) -> Credentials:
     message, signature = token.rsplit(".", 1)
     try:
         credentials = Credentials(
