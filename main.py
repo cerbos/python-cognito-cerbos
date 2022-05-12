@@ -84,6 +84,15 @@ def get_user_from_session(request: Request) -> dict:
     return Credentials.from_dict(creds)
 
 
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    template_ctx = {"request": request}
+    if (url := get_hosted_url("/oauth2/authorize")) is not None:
+        template_ctx["hosted_url"] = url
+    return templates.TemplateResponse("index.html", template_ctx)
+
+
+# Local login endpoint
 @app.post("/login")
 async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends()):
     c = Cognito(AWS_COGNITO_POOL_ID, AWS_COGNITO_CLIENT_ID, username=form_data.username)
@@ -111,14 +120,7 @@ async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends
     return RedirectResponse(url="/user", status_code=status.HTTP_303_SEE_OTHER)
 
 
-@app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    template_ctx = {"request": request}
-    if (url := get_hosted_url("/oauth2/authorize")) is not None:
-        template_ctx["hosted_url"] = url
-    return templates.TemplateResponse("index.html", template_ctx)
-
-
+# Used by the hosted UI, if enabled
 @app.get("/callback")
 async def callback(request: Request):
     code = request.query_params["code"]
