@@ -52,9 +52,9 @@ AWS_COGNITO_HOSTED_UI_LOGOUT_URL
 
 ### Groups
 
-This demo maps Cognito groups to Cerbos roles. The app will retrieve the groups from the access token, and use them to determine authorization.
+This demo maps Cognito User Pool groups to Cerbos roles. The app will retrieve the groups from the access token, and use them to determine authorization.
 
-Any test users in your pool should be added to one or both of `admin` and `user` to demonstrate different access to the test resources.
+Any test users in your pool should be added to one or both of `admin` and/or `user` groups to demonstrate different access to the demo resources.
 
 ## Policies
 
