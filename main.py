@@ -180,6 +180,7 @@ async def user(request: Request, credentials: dict = Depends(get_user_from_sessi
         },
     )
 
+    # resources would usually be retrieved from your data store
     actions = ["read", "update", "delete"]
     resource_list = ResourceList(
         resources=[
@@ -217,9 +218,13 @@ async def user(request: Request, credentials: dict = Depends(get_user_from_sessi
         #     "id": user_id,
         #     "foo": "bar",
         # }
-
-        resp = c.check_resources(principal=principal, resources=resource_list)
-        resp.raise_if_failed()
+        try:
+            resp = c.check_resources(principal=principal, resources=resource_list)
+            resp.raise_if_failed()
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Unauthorized"
+            )
 
     return templates.TemplateResponse(
         "user.html",
