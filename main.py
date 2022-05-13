@@ -84,8 +84,10 @@ def get_user_from_session(request: Request) -> dict:
     return Credentials.from_dict(creds)
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
 async def index(request: Request):
+    if request.session.get("user_credentials"):
+        return RedirectResponse(url="/user", status_code=status.HTTP_303_SEE_OTHER)
     template_ctx = {"request": request}
     if (url := get_hosted_url("/oauth2/authorize")) is not None:
         template_ctx["hosted_url"] = url
@@ -156,7 +158,7 @@ async def callback(request: Request):
 
 @app.get("/logout")
 async def logout(request: Request):
-    request.session.pop("user_credentials")
+    request.session.pop("user_credentials", None)
     # If hosted login was used to sign in, redirect to the hosted logout
     # it will ultimately redirect back to `logout_uri`
     if request.session.pop("used_hosted", None):
