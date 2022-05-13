@@ -169,13 +169,13 @@ async def logout(request: Request):
 async def user(request: Request, credentials: dict = Depends(get_user_from_session)):
     claims = credentials.claims
     user_id: str = claims["sub"]
-    groups: list[str] = claims.get("cognito:groups", [])
-    # override rules for demonstrative purposes
-    # groups = ["user"]
+    roles: list[str] = claims.get("cognito:groups", [])
+    # override roles for demonstrative purposes
+    # roles = ["user"]
 
     principal = Principal(
         user_id,
-        roles=groups,
+        roles=roles,
         policy_version="20210210",
         attr={
             "foo": "bar",
