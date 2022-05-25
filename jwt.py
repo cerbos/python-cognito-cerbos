@@ -19,7 +19,7 @@ bearer_scheme = HTTPBearer()
 JWK = dict[str, str]
 
 
-@dataclass()
+@dataclass
 class JWKS:
     keys: list[JWK]
 
