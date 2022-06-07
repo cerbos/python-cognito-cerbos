@@ -51,7 +51,7 @@ dependencies = [
 
 [[package]]
 name = "cerbos"
-version = "0.1.0"
+version = "0.2.0"
 requires_python = ">=3.8"
 summary = "SDK for working with Cerbos: an open core, language-agnostic, scalable authorization solution"
 dependencies = [
@@ -627,9 +627,9 @@ content_hash = "sha256:aa6c39f83a1d3e9939d423655dce0d6d9354ddae7df1ca1ca561b2cba
     {file = "botocore-1.25.11-py3-none-any.whl", hash = "sha256:24423c4f6a738400ea27b529135be6f25c1e32f9fbea29eef1058086095bf984"},
     {file = "botocore-1.25.11.tar.gz", hash = "sha256:6eda32376dffba59574119ae82e243677f14e6652824e1e8876e8f3fad909d76"},
 ]
-"cerbos 0.1.0" = [
-    {file = "cerbos-0.1.0-py3-none-any.whl", hash = "sha256:f96dce465c07c50ab7e3a9f6b68ed16912c44d4f908bdb2f4ede268c5b69de9a"},
-    {file = "cerbos-0.1.0.tar.gz", hash = "sha256:94b4d8e1c0d838ad860e2fad32a168d18fda77a102dd0bd9a01512bef9bfa0e1"},
+"cerbos 0.2.0" = [
+    {file = "cerbos-0.2.0-py3-none-any.whl", hash = "sha256:191b08d63a52f587695901223139582c279bd975f8555ebbbb16038256596ab8"},
+    {file = "cerbos-0.2.0.tar.gz", hash = "sha256:cdbad0aba6dcda948f5468461b7ab097764a76c34b08dad718b1df5c4a5d14bf"},
 ]
 "certifi 2021.10.8" = [
     {file = "certifi-2021.10.8-py2.py3-none-any.whl", hash = "sha256:d62a0163eb4c2344ac042ab2bdf75399a71a2d8c7d47eac2e2ee91b9d6339569"},
