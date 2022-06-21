@@ -5,7 +5,7 @@ An example application of integrating [Cerbos](https://cerbos.dev) with a [FastA
 ## Dependencies
 
 - Python 3.10
-- Docker for running the [Cerbos Policy Decision Point (PDP)](https://docs.cerbos.dev/cerbos/0.6.0/installation/container.html)
+- Docker for running the [Cerbos Policy Decision Point (PDP)](https://docs.cerbos.dev/cerbos/latest/installation/container.html)
 - A configured AWS Cognito User Pool ([set-up guide](https://docs.aws.amazon.com/cognito/latest/developerguide/getting-started-with-cognito-user-pools.html))
 
 ## Getting Started
