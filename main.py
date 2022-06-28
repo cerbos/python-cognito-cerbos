@@ -14,7 +14,7 @@ from pycognito import Cognito
 from pycognito.exceptions import ForceChangePasswordException
 from starlette.middleware.sessions import SessionMiddleware
 
-from jwt import Credentials, get_credentials_from_token
+from jwt import Credentials, get_credentials_from_token, get_user_from_session
 
 # AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
 # AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
@@ -72,16 +72,6 @@ def get_hosted_url(
 
 def prettify_json(data: dict) -> str:
     return json.dumps(data, sort_keys=False, indent=2)
-
-
-def get_user_from_session(request: Request) -> dict:
-    creds = request.session.get("user_credentials")
-    if creds is None:
-        raise HTTPException(
-            status_code=status.HTTP_307_TEMPORARY_REDIRECT,
-            headers={"Location": request.url_for("index")},
-        )
-    return Credentials.from_dict(creds)
 
 
 @app.get("/")
@@ -168,7 +158,9 @@ async def logout(request: Request):
 
 
 @app.get("/user", response_class=HTMLResponse)
-async def user(request: Request, credentials: dict = Depends(get_user_from_session)):
+async def user(
+    request: Request, credentials: Credentials = Depends(get_user_from_session)
+):
     claims = credentials.claims
     user_id: str = claims["sub"]
     roles: list[str] = claims.get("cognito:groups", [])

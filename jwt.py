@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import requests
 from dataclasses_json import dataclass_json
-from fastapi import Depends, HTTPException, Request
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import (  # OAuth2PasswordBearer,
     HTTPAuthorizationCredentials,
     HTTPBearer,
@@ -68,6 +68,21 @@ async def get_token_from_bearer(
             )
 
         return http_credentials.credentials
+
+
+def get_user_from_session(request: Request) -> Credentials:
+    if (c := request.session.get("user_credentials")) is None:
+        raise HTTPException(
+            status_code=status.HTTP_307_TEMPORARY_REDIRECT,
+            headers={"Location": request.url_for("index")},
+        )
+    else:
+        creds = Credentials.from_dict(c)
+
+    if not verify_jwt(creds):
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="JWK invalid")
+
+    return creds
 
 
 async def get_credentials_from_token(
