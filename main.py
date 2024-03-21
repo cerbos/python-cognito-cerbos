@@ -14,7 +14,7 @@ from pycognito import Cognito
 from pycognito.exceptions import ForceChangePasswordException
 from starlette.middleware.sessions import SessionMiddleware
 
-from jwt import Credentials, get_credentials_from_token, get_user_from_session
+from credentials import Credentials, get_credentials_from_token, get_user_from_session
 
 # AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
 # AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]

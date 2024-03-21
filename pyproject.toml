@@ -20,8 +20,6 @@ dependencies = [
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
 
-[project.optional-dependencies]
-
 [tool.pdm]
 [tool.pdm.dev-dependencies]
 lint = ["black>=22.3.0", "isort>=5.10.1"]
