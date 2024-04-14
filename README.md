@@ -1,6 +1,12 @@
-# python-cognito-cerbos
+<h1 align="center"> Python + AWS Congito + Cerbos Demo </h1>
 
 An example application of integrating [Cerbos](https://cerbos.dev) with a [FastAPI](https://fastapi.tiangolo.com/) server using [AWS Cognito](https://aws.amazon.com/cognito/) for authentication.
+
+<p align="center">
+  Sequence Diagram
+</p>
+
+![AWS_Cerbos_Demo](python-cognito-demo.png)
 
 ## Dependencies
 
