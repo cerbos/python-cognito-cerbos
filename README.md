@@ -1,4 +1,4 @@
-<h1 align="center"> Python + AWS Congito + Cerbos Demo </h1>
+<h1 align="center"> Python + AWS Cognito + Cerbos Demo </h1>
 
 An example application of integrating [Cerbos](https://cerbos.dev) with a [FastAPI](https://fastapi.tiangolo.com/) server using [AWS Cognito](https://aws.amazon.com/cognito/) for authentication.
 
