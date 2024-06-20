@@ -58,9 +58,8 @@ def verify_jwt(credentials: Credentials) -> bool:
 
 
 async def get_token_from_bearer(
-    request: Request,
     http_credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
-) -> Credentials:
+) -> str:
     if http_credentials:
         if not http_credentials.scheme == "Bearer":
             raise HTTPException(
